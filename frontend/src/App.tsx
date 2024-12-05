@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import {Bounce, toast} from "react-toastify"
+import { Bounce, toast } from "react-toastify";
+import { Send, Copy, Plus, Users } from "lucide-react";
 import "./App.css";
 
 function App() {
@@ -16,7 +17,7 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket("http://localhost:8080");
+    const ws = new WebSocket("http://192.168.1.4:8080");
     setWs(ws);
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
@@ -28,7 +29,6 @@ function App() {
     if (!ws) {
       return;
     }
-    console.log(11111);
     ws.send(
       JSON.stringify({
         type: "chat",
@@ -39,7 +39,6 @@ function App() {
       })
     );
     setCMsg("");
-    console.log("message sent");
   }
 
   function createRoom() {
@@ -118,127 +117,125 @@ function App() {
       });
   }
 
+  // Add this new function to handle key press
+  function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && currentMsg.trim() !== '') {
+      sendMsg();
+    }
+  }
+
   return (
     <>
       {!coonected ? (
-        <div className="flex flex-col h-screen  items-center bg-[#0e0e0e] w-screen text-white p-10">
+        <div className="flex flex-col min-h-screen items-center bg-[#0e0e0e] w-full text-white p-4 md:p-10">
           <div className="flex flex-col items-center">
-            <h3 className="text-3xl font-semibold">Temp</h3>
-            <h2 className="text-7xl font-bold m-5">
+            <h3 className="text-2xl md:text-3xl font-semibold text-red-500">Welcome to</h3>
+            <h2 className="text-5xl md:text-7xl font-bold m-5">
               <span className="bg-red-500 px-2">Chat</span> App
             </h2>
           </div>
-          <div className=" flex flex-col justify-center w-1/2 gap-3 mt-48">
-            <input
-              type="text "
-              className="my-5 px-5 py-3 w-full border-[#4e4e4e] border-[1px] rounded-md  bg-[#0e0e0e] "
-              placeholder="Enter Your name"
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
+          
+          <div className="flex flex-col justify-center w-full md:w-1/2 max-w-2xl gap-4 mt-20">
+            <div className="relative">
+              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                className="my-5 pl-10 pr-5 py-4 w-full border-[#4e4e4e] border-[1px] rounded-lg bg-[#0e0e0e] focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="Enter Your name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
             <div className="w-full flex gap-2">
               <input
-                type="text "
-                className="px-5 py-3 w-5/6 border-[#4e4e4e] border-[1px] rounded-md  bg-[#0e0e0e] text-center"
-                placeholder="Enter the room id"
-                onChange={(e) => {
-                  setRoom(e.target.value);
-                }}
+                type="text"
+                className="px-5 py-4 w-full border-[#4e4e4e] border-[1px] rounded-lg bg-[#0e0e0e] text-center focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="Enter the room ID"
+                onChange={(e) => setRoom(e.target.value)}
               />
               <button
-                className="border-[#4e4e4e] w-1/6 border-[1px] rounded-md px-5 py-3"
+                className="border-[#4e4e4e] min-w-[100px] border-[1px] rounded-lg px-4 py-3 hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center gap-2"
                 onClick={() => joinRoom(roomid)}
               >
-                Join Room{" "}
+                Join
               </button>
             </div>
-            <center>
-              <p>- or - </p>
-            </center>
+
+            <div className="flex items-center my-4">
+              <div className="flex-1 border-t border-[#4e4e4e]"></div>
+              <span className="px-4 text-[#4e4e4e]">or</span>
+              <div className="flex-1 border-t border-[#4e4e4e]"></div>
+            </div>
+
             <button
-              className="border-[#4e4e4e] border-[1px] rounded-md px-5 py-3"
+              className="border-[#4e4e4e] border-[1px] rounded-lg px-5 py-4 hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center gap-2"
               onClick={createRoom}
             >
-              Create Room{" "}
+              <Plus size={20} />
+              Create New Room
             </button>
           </div>
         </div>
       ) : (
-        <>
-          <div
-            id="chatting"
-            className="h-screen bg-[#0e0e0e] w-screen flex flex-col justify-between p-5 text-white items-center"
-          >
-            <div className="flex overflow-scroll flex-col w-1/2 screen m-5 p-5 gap-5">
-              <div className="py-5 border-[#3e3e3e] border-[1px] px-5 rounded-md w-full flex justify-between items-center">
-                <h2>Room ID : {localStorage.getItem("roomid")}</h2>
-                <button onClick={()=>{
+        <div className="h-screen bg-[#0e0e0e] flex flex-col">
+          <div className="w-full md:w-3/4 lg:w-2/3 mx-auto flex-1 flex flex-col p-4 md:p-5">
+            <div className="py-4 border-[#3e3e3e] border-[1px] px-4 rounded-lg w-full flex justify-between items-center mb-4 bg-[#161616]">
+              <h2 className="text-sm md:text-base text-white">Room ID: {localStorage.getItem("roomid")}</h2>
+              <button
+                onClick={() => {
                   const id = localStorage.getItem("roomid");
-                  if(!id){
-                    return;
-                  }
-                   navigator.clipboard.writeText(id)
-                   toast.success('Copied to clipboard!', {
-                    position: "top-left",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: 0,
-                    theme: "dark",
-                    transition: Bounce,
-                    });
-                }}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-                  />
-                </svg>
-                </button>
-              </div>
-              {msgs.map((e) => {
+                  if (!id) return;
+                  navigator.clipboard.writeText(id);
+                  toast.success("Copied to clipboard!");
+                }}
+                className="p-2 hover:bg-[#2a2a2a] rounded-md transition-colors text-white"
+              >
+                <Copy size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 mb-4 text-white">
+              {msgs.map((e, index) => {
                 const isUserMessage = localStorage.getItem("name") === e.name;
                 return (
-                  <div className={`flex flex-col ${isUserMessage ? "items-end" : "items-start"}`}>
-                    <div className="text-xs p-1">{e.name}</div>
-                    <div className={`p-3 bg-[#0e0e0e] border-[#3e3e3e] border-[1px] w-max rounded-md ${isUserMessage ? "self-end" : "self-start"}`}>
+                  <div
+                    key={index}
+                    className={`flex flex-col ${isUserMessage ? "items-end" : "items-start"}`}
+                  >
+                    <div className="text-xs text-gray-400 mb-1">{e.name}</div>
+                    <div
+                      className={`p-3 bg-[#161616] border-[#3e3e3e] border-[1px] max-w-[80%] rounded-lg overscroll-auto ${
+                        isUserMessage ? "bg-red-500/10 border-red-500/20" : ""
+                      }`}
+                    >
                       {e.message}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex gap-3 items-center justify-center w-1/2 mb-10">
+          </div>
+
+          <div className="w-full bg-[#0e0e0e] border-t border-[#3e3e3e] p-4 sticky bottom-0">
+            <div className="w-full md:w-3/4 lg:w-2/3 mx-auto flex gap-2 items-center bg-[#161616] p-2 rounded-lg">
               <input
-                type="text "
-                className="px-5 py-3 w-full  border-[#4e4e4e] border-[1px] rounded-md  bg-[#0e0e0e] "
-                placeholder="Enter message here ... "
+                type="text"
+                className="px-4 py-3 w-full bg-transparent focus:outline-none text-white"
+                placeholder="Type your message..."
                 value={currentMsg}
-                onChange={(e) => {
-                  setCMsg(e.target.value);
-                }}
+                onChange={(e) => setCMsg(e.target.value)}
+                onKeyDown={handleKeyPress}
               />
               <button
-                className="border-[#4e4e4e] border-[1px] rounded-md px-5 py-3"
+                className="p-3 rounded-lg bg-red-500 hover:bg-red-600 transition-colors text-white"
                 onClick={sendMsg}
               >
-                Send
+                <Send size={20} />
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
