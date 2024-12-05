@@ -17,6 +17,7 @@ wss.on("connection",(ws:WebSocket)=>{
 
     ws.on("message",(data)=>{
         const info = JSON.parse(data.toString());
+        
         if(info.type === "join"){
             allSocket.push({
                 socket: ws,
@@ -24,11 +25,16 @@ wss.on("connection",(ws:WebSocket)=>{
             })
             console.log("user joined the room :"+ info.payload.roomid);
         }
+        
         if(info.type === "chat"){
             const currentUser = allSocket.find((x)=> x.socket == ws);
             allSocket.map((e)=>{
                 if(e.roomid == currentUser?.roomid){
-                    e.socket.send(info.payload.message);
+                    e.socket.send(JSON.stringify({
+                        name : info.payload.name,
+                        message: info.payload.message
+                    }
+                    ));
                 }
             })
         }
