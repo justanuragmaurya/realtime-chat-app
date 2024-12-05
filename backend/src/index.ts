@@ -22,6 +22,7 @@ wss.on("connection",(ws:WebSocket)=>{
                 socket: ws,
                 roomid: info.payload.roomid
             })
+            console.log("user joined the room :"+ info.payload.roomid);
         }
         if(info.type === "chat"){
             const currentUser = allSocket.find((x)=> x.socket == ws);
