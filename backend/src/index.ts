@@ -2,22 +2,39 @@ import { WebSocketServer } from "ws";
 import WebSocket from "ws";
 
 let userCount = 0 ;
-let allSocket:WebSocket[] = [];
 const wss = new WebSocketServer({port : 8080}) 
+
+interface User {
+    socket: WebSocket;
+    roomid : string;
+}
+
+const allSocket :User[] = []
 
 wss.on("connection",(ws:WebSocket)=>{
     userCount++ ;
     console.log(userCount)
-    allSocket.push(ws);
+
     ws.on("message",(data)=>{
-        allSocket.map((wsss)=>{
-            wsss.send(data.toString())
+        const info = JSON.parse(data.toString());
+        if(info.type === "join"){
+            allSocket.push({
+                socket: ws,
+                roomid: info.payload.roomid
+            })
         }
-    )})
+        if(info.type === "chat"){
+            const currentUser = allSocket.find((x)=> x.socket == ws);
+            allSocket.map((e)=>{
+                if(e.roomid == currentUser?.roomid){
+                    e.socket.send(info.payload.message);
+                }
+            })
+        }
+    })
     
     ws.on("close",()=>{
         userCount--;
-        console.log(userCount)  
-        allSocket = allSocket.filter(x => x !== ws);
+        console.log(userCount)        
     })
 })
