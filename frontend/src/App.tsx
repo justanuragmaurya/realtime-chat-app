@@ -17,7 +17,7 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket("wss://159.65.146.24:8080");
+    const ws = new WebSocket("ws://159.65.146.24:8080");
     setWs(ws);
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
