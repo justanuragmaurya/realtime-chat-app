@@ -17,8 +17,16 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket("wss://realtime-chat-app-b7ka.onrender.com");
+    // const ws = new WebSocket("wss://realtime-chat-app-b7ka.onrender.com");
+    const wsUrl = import.meta.env.VITE_BACKEND_WEBSOCKET_URL;
+    if (!wsUrl) {
+      console.error("WebSocket URL is not defined");
+      return;
+    }
+    console.log("don");
+    const ws = new WebSocket(wsUrl);
     setWs(ws);
+
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
       setMsg((prev) => [...prev, data]);
@@ -26,6 +34,9 @@ function App() {
   }, []);
 
   function sendMsg() {
+    if(currentMsg==""){
+      return
+    }
     if (!ws) {
       return;
     }
@@ -42,6 +53,20 @@ function App() {
   }
 
   function createRoom() {
+    if(username==""){
+      toast.error("Please enter your name", {
+        position: "top-left",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: 0,
+        theme: "light",
+        transition: Bounce,
+        });
+      return
+    }
     const chars = [
       "A",
       "B",
@@ -91,6 +116,34 @@ function App() {
   }
 
   function joinRoom(roomidd: string | undefined = undefined) {
+    if(roomidd==""){
+      toast.error("Please enter a room id", {
+        position: "top-left",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: 0,
+        theme: "light",
+        transition: Bounce,
+        });
+      return
+    }
+    if(username==""){
+        toast.error("Please your name ", {
+          position: "top-left",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: 0,
+          theme: "light",
+          transition: Bounce,
+          });
+        return
+    }
     if (!ws) {
       return;
     }
